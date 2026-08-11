@@ -1,0 +1,171 @@
+/* =========================
+STORY TRANSITIONS
+========================= */
+
+@keyframes storyIn{
+0%{
+opacity:0;
+transform:translateY(22px);
+filter:blur(4px);
+}
+
+100%{
+opacity:1;
+transform:translateY(0);
+filter:blur(0);
+}
+}
+
+@keyframes storyOut{
+0%{
+opacity:1;
+transform:translateY(0);
+filter:blur(0);
+}
+
+100%{
+opacity:0;
+transform:translateY(-22px);
+filter:blur(4px);
+}
+}
+
+@keyframes softScale{
+0%{
+opacity:0;
+transform:scale(.88);
+}
+
+60%{
+opacity:1;
+}
+
+100%{
+transform:scale(1);
+}
+}
+
+@keyframes wordIn{
+0%{
+opacity:0;
+transform:translateY(12px);
+}
+
+100%{
+opacity:1;
+transform:translateY(0);
+}
+}
+
+.line{
+opacity:0;
+animation:
+storyIn .65s var(--ease) forwards;
+}
+
+.leaving .line{
+animation:
+storyOut .45s var(--ease) forwards;
+}
+
+.display{
+animation:
+softScale .9s var(--ease) forwards;
+}
+
+/* الأرقام الكبيرة */
+
+.num-huge{
+animation:
+softScale 1s var(--ease) forwards;
+}
+
+/* ظهور الكلمات في قسم 05 */
+
+.story-word{
+opacity:0;
+animation:
+wordIn .65s var(--ease) forwards;
+}
+
+/* العناوين */
+
+.title{
+opacity:0;
+animation:
+storyIn .8s var(--ease) forwards;
+}
+
+/* الأزرار */
+
+button.choice{
+opacity:0;
+animation:
+storyIn .65s var(--ease) forwards;
+
+transition:
+transform .25s var(--ease),
+background-color .35s var(--ease),
+color .35s var(--ease),
+opacity .35s ease;
+}
+
+button.choice:hover{
+transform:translateY(-3px);
+}
+
+button.choice:active{
+transform:scale(.96);
+}
+
+/* الانتقال بين الشاشات */
+
+#app{
+transition:
+opacity .25s ease,
+transform .25s var(--ease);
+}
+
+/* ظهور الـ badges */
+
+.badge{
+transition:
+opacity .45s var(--ease),
+transform .45s var(--ease),
+color .45s ease;
+}
+
+.badge.active{
+transform:translateX(-3px);
+}
+
+/* سهم المتابعة */
+
+.continue{
+transition:
+opacity .5s ease,
+transform .4s var(--ease);
+}
+
+/* رقم 19 → 20 */
+
+.morph-number{
+transition:
+transform 1s var(--ease),
+opacity 1s var(--ease),
+filter 1s var(--ease);
+}
+
+/* تقليل الحركة لو الجهاز طالب كده */
+
+@media (prefers-reduced-motion:reduce){
+
+*,
+*::before,
+*::after{
+animation-duration:.01ms !important;
+transition-duration:.01ms !important;
+}
+
+}
+ده نسميهو شنو؟
