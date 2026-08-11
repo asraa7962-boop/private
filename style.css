@@ -1,0 +1,52 @@
+:root{
+  --black:#0D0D0D;
+  --cream:#F3E8D3;
+  --ink:#191711;
+
+  --blue:#4169E1;
+  --burgundy:#7A1F2B;
+
+  --bg:var(--cream);
+  --fg:var(--ink);
+  --accent:var(--blue);
+
+  --transition-fast:.45s;
+  --transition-medium:.8s;
+  --transition-slow:1.4s;
+
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+
+html,
+body{
+  background:var(--bg);
+  color:var(--fg);
+
+  transition:
+    background-color var(--transition-slow) var(--ease),
+    color var(--transition-slow) var(--ease);
+}
+
+body.bg-black{
+  --bg:var(--black);
+  --fg:var(--cream);
+  --accent:var(--blue);
+}
+
+body.bg-beige{
+  --bg:var(--cream);
+  --fg:var(--ink);
+  --accent:var(--blue);
+}
+
+body.bg-burgundy-lean{
+  --bg:var(--cream);
+  --fg:var(--ink);
+  --accent:var(--burgundy);
+}
+
+body.bg-blue-lean{
+  --bg:var(--cream);
+  --fg:var(--ink);
+  --accent:var(--blue);
+}
