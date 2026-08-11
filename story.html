@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+<title>إسراء — 19</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --blue:#4169E1;
+  --burgundy:#7A1F2B;
+  --beige:#F3E8D3;
+  --black:#111111;
+  --ink:#1c1912;
+
+  --bg:var(--beige);
+  --fg:var(--ink);
+  --accent:var(--blue);
+
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
+
+html,body{
+  width:100%;
+  height:100%;
+  margin:0;
+  padding:0;
+  overflow:hidden;
+}
+
+body{
+  background:var(--bg);
+  color:var(--fg);
+  font-family:'Tajawal',sans-serif;
+  transition:
+    background-color 1.4s var(--ease),
+    color 1.4s var(--ease);
+}
+
+body.black{
+  --bg:#111111;
+  --fg:#F3E8D3;
+  --accent:var(--blue);
+}
+
+body.beige{
+  --bg:#F3E8D3;
+  --fg:#1c1912;
+  --accent:var(--blue);
+}
+
+body.burgundy{
+  --bg:#F3E8D3;
+  --fg:#1c1912;
+  --accent:var(--burgundy);
+}
+
+#stage{
+  position:fixed;
+  inset:0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:8vh 6vw;
+}
+
+#app{
+  width:100%;
+  max-width:650px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-align:center;
+  gap:1.1em;
+}
+
+.line{
+  opacity:0;
+  transform:translateY(14px);
+  animation:rise .5s var(--ease) forwards;
+  font-size:clamp(1.05rem,2.4vw + .8rem,1.5rem);
+  line-height:1.65;
+  max-width:34ch;
+}
+
+.strong{
+  font-weight:700;
+}
+
+.accent{
+  color:var(--accent);
+}
+
+.title{
+  font-family:'Amiri',serif;
+  font-weight:700;
+  font-size:clamp(1.8rem,5vw,2.8rem);
+  color:var(--accent);
+}
+
+.display{
+  font-family:'Amiri',serif;
+  font-weight:700;
+  color:var(--accent);
+  line-height:1;
+}
+
+.number{
+  font-size:clamp(4rem,15vw,8rem);
+}
+
+.word{
+  font-family:'Amiri',serif;
+  font-size:clamp(1.8rem,5vw,3rem);
+  color:var(--accent);
+  font-weight:700;
+}
+
+@keyframes rise{
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+.leaving .line{
+  animation:fall .5s var(--ease) forwards;
+}
+
+@keyframes fall{
+  to{
+    opacity:0;
+    transform:translateY(-14px);
+  }
+}
+
+.continue{
+  position:fixed;
+  bottom:6vh;
+  left:50%;
+  transform:translateX(-50%);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:.3em;
+  opacity:0;
+  font-size:.75rem;
+  letter-spacing:.08em;
+  color:var(--fg);
+  animation:bob 2.2s ease-in-out infinite;
+  pointer-events:none;
+}
+
+@keyframes bob{
+  0%,100%{
+    transform:translate(-50%,0);
+  }
+
+  50%{
+    transform:translate(-50%,6px);
+  }
+}
+
+.chev{
+  width:14px;
+  height:14px;
+  border-inline-end:2px solid currentColor;
+  border-block-end:2px solid currentColor;
+  transform:rotate(45deg);
+}
+
+.badges{
+  position:fixed;
+  top:5vh;
+  inset-inline-start:6vw;
+  display:flex;
+  flex-direction:column;
+  gap:.4em;
+}
+
+.badge{
+  font-family:'Amiri',serif;
+  font-weight:700;
+  color:var(--accent);
+  opacity:.35;
+  transition:.4s;
+}
+
+.badge.active{
+  opacity:1;
+  font-size:1.15rem;
+}
+
+.words{
+  display:flex;
+  flex-direction:column;
+  gap:.35em;
+}
+
+.restart{
+  margin-top:1.5em;
+  font-family:'Tajawal',sans-serif;
+  font-size:.9rem;
+  background:none;
+  border:0;
+  color:var(--fg);
+  text-decoration:underline;
+  opacity:.6;
+  cursor:pointer;
+}
+
+@media(prefers-reduced-motion:reduce){
+  *{
+    animation-duration:.01ms!important;
+    transition-duration:.01ms!important;
+  }
+}
+</style>
+</head>
+
+<body class="beige">
+
+<div id="stage">
+  <div id="app"></div>
+</div>
+
+<div class="continue" id="hint">
+  <span class="chev"></span>
+  <span>تابعي</span>
+</div>
+
+<div class="badges" id="badges"></div>
+
+<script>
+(function(){
+
+const app=document.getElementById('app');
+const stage=document.getElementById('stage');
+const hint=document.getElementById('hint');
+const badges=document.getElementById('badges');
+
+function bg(type){
+  document.body.className=type;
+}
+
+function clear(){
+  return new Promise(resolve=>{
+
+    if(!app.children.length){
+      resolve();
+      return;
+    }
+
+    app.classList.add('leaving');
+
+    setTimeout(()=>{
+      app.innerHTML='';
+      app.classList.remove('leaving');
+      resolve();
+    },420);
+  });
+}
+
+async function screen(lines,options={}){
+  await clear();
+
+  bg(options.bg || 'beige');
+
+  hint.style.opacity=0;
+
+  lines.forEach((item,i)=>{
+
+    const data=
+      typeof item==='string'
+        ? {text:item}
+        : item;
+
+    const el=document.createElement('div');
+
+    el.className='line '+(data.cls||'');
+
+    el.textContent=data.text;
+
+    el.style.animationDelay=
+      (data.delay!==undefined
+        ? data.delay
+        : i*.35)+'s';
+
+    app.appendChild(el);
+  });
+
+  const total=
+    lines.length
+      ? (lines.length-1)*.35+.6
+      : .5;
+
+  setTimeout(()=>{
+    hint.style.opacity=.6;
+  },total*1000);
+
+  return total;
+}
+
+function wait(){
+  return new Promise(resolve=>{
+
+    function cleanup(){
+      stage.removeEventListener('click',click);
+      window.removeEventListener('keydown',key);
+      hint.style.opacity=0;
+    }
+
+    function click(){
+      cleanup();
+      resolve();
+    }
+
+    function key(e){
+      if(['Enter',' ','ArrowLeft','ArrowRight'].includes(e.key)){
+        cleanup();
+        resolve();
+      }
+    }
+
+    stage.addEventListener('click',click);
+    window.addEventListener('keydown',key);
+  });
+}
+
+async function beat(lines,options={}){
+  const delay=await screen(lines,options);
+
+  await new Promise(r=>
+    setTimeout(r,Math.max(300,delay*300))
+  );
+
+  await wait();
+}
+
+function updateBadges(active){
+
+  badges.innerHTML='';
+
+  for(let i=1;i<=6;i++){
+
+    const el=document.createElement('div');
+
+    el.className=
+      'badge '+(i===active?'active':'');
+
+    el.textContent=
+      String(i).padStart(2,'0');
+
+    badges.appendChild(el);
+  }
+}
+
+function hideBadges(){
+  badges.innerHTML='';
+}
+
+async function events(){
+
+  await beat(
+    [{text:'الأحداث',cls:'title'}],
+    {bg:'beige'}
+  );
+
+  await beat([
+    'لكن السنة ما كانت أشخاصا فقط.',
+    'كانت هناك أشياء حدثت...',
+    'وأشياء بدأت، وأشياء غيرت شكل السنة.'
+  ]);
+
+  await beat(
+    [{text:'الجامعة',cls:'display title'}],
+    {bg:'beige'}
+  );
+
+  await beat([
+    'كانت بداية جديدة جدا.',
+    'مكان جديد، ناس جديدة، وتجارب جديدة...',
+    'ومع كل يوم فيها، كنت أكتشف حاجة جديدة عن نفسي.',
+    'حاجة في شخصيتي ما كنت عارفاها، قدرة ما كنت متأكدة إنها عندى، وجانب مني ما كان عنده فرصة يظهر قبل كده.'
+  ]);
+
+  await beat([
+    'يمكن الجامعة ما علمتني بس حاجات عن تخصصي...',
+    {text:'علمتني حاجات عني أنا.',cls:'strong accent'}
+  ]);
+
+  await beat(
+    [{text:'مجلس الانتداب',cls:'display title'}],
+    {bg:'beige'}
+  );
+
+  await beat([
+    'والأهم...',
+    'كانت أول تجربة لي في فريق... وأول مرة أجد نفسي وسط ناس، ومسؤوليات وحاجة فعلا تعتمد علي.',
+    'ويمكن ما كنت عارفة وقتها أنا بقدر أعمل شنو بالضبط.',
+    'لكن التجربة دي طلعتني من منطقة راحتي أكثر من مرة، وخلتني أجرب حاجات ما كنت حأجربها لو فضلت في مكاني.',
+    'اكتشفت إني ممكن يعتمد علي.',
+    'وإن الحاجات البفتكرها كبيرة علي... ممكن أعملها.',
+    {text:'وأقدر أعمل حاجات أكبر بكتير مما كنت متخيلة.',cls:'strong accent'}
+  ]);
+
+  await beat([
+    'ويمكن دي كانت واحدة من أهم الحاجات الاتعلمتها عن نفسي في سنتي الـ19.'
+  ]);
+}
+
+const chapters=[
+
+  {
+    n:1,
+    title:'كنت أبحث',
+    lines:[
+      'في بداية سنتي الـ19، كنت أحاول أفهم نفسي أكثر.',
+      'كنت أبحث عن حاجات كثيرة... عن مكان أنتمي ليهو، عن حاجات تشبهني، وعن نسخة مني أكون راضية عنها.',
+      'وما كنت عارفة إن البحث نفسه حيغيرني.'
+    ]
+  },
+
+  {
+    n:2,
+    title:'خرجت من مكاني',
+    lines:[
+      'دخلت أماكن جديدة.',
+      'قابلت ناس جدد.',
+      'جربت حاجات ما كنت متعودة عليها.',
+      'وقلت "أيوة" لحاجات كان ممكن زمان أقول ليها "لا".',
+      'كل مرة خرجت فيها من منطقة راحتي، اكتشفت جزءا جديدا مني.'
+    ]
+  },
+
+  {
+    n:3,
+    title:'اكتشفت أنني أقدر',
+    special:true,
+    lines:[
+      'وما كان الاكتشاف إنني بقيت شخصًا خارقًا.',
+      'اكتشفت إن الناس ممكن تعتمد علي.',
+      'وإن عندى قدرة أبدأ، وأتحمل مسؤولية، وأعمل حاجات كنت شايفاها أكبر مني.',
+      'بس اكتشفت إنى كنت أقلل من قدرتي على نفسي.'
+    ]
+  },
+
+  {
+    n:4,
+    title:'لم تكن سنة مثالية',
+    lines:[
+      'ما حققت كل الأفكار البديت بيها السنة.',
+      'في حاجات أجلتها. وحاجات ما حصلت وحاجات بدأت وما كملتها.',
+      'وما كنت دائما النسخة البتمنى أكونها.',
+      'لكنني حاولت.',
+      'وحاليا... دى حاجة أنا راضية عنها.'
+    ]
+  },
+
+  {
+    n:5,
+    title:'صرت أقرب',
+    words:[
+      'عفويتي.',
+      'اندفاعي.',
+      'فضولي.',
+      'طموحي.',
+      'فوضاي.',
+      'حاجاتي الحلوة.',
+      'وحاجاتي البحتاج أصلحها.'
+    ],
+    after:'بطلت أحاول أفصل نفسي عن الحاجات البتخليني أنا.'
+  },
+
+  {
+    n:6,
+    title:'قصة حب',
+    love:true,
+    lines:[
+      'يمكن...',
+      'لأول مرة، بدأت أفهم إن علاقتي بنفسي ما مفروض تكون حربًا مستمرة عشان أبقى "أفضل".',
+      'ممكن أكون طموحة ... وأظل راضية.',
+      'ممكن أعرف عيوبي... وما أكره نفسي بسببها.',
+      'ممكن أتغير ... من غير ما أكره النسخة القديمة مني.',
+      'يمكن كانت دى بداية قصة حب مع نفسي.'
+    ]
+  }
+
+];
+
+async function self(){
+
+  hideBadges();
+
+  await beat(
+    ['عرفت من كانوا معي.'],
+    {bg:'black'}
+  );
+
+  await beat(
+    ['وعرفت ما حدث.'],
+    {bg:'black'}
+  );
+
+  await beat(
+    ['لكن...'],
+    {bg:'black'}
+  );
+
+  await beat(
+    ['ماذا عنى أنا ؟'],
+    {bg:'black'}
+  );
+
+  await beat(
+    ['ماذا حدث لإسراء؟'],
+    {bg:'black'}
+  );
+
+  for(const chapter of chapters){
+
+    updateBadges(chapter.n);
+
+    if(chapter.special){
+
+      await beat(
+        [{text:String(chapter.n).padStart(2,'0'),cls:'display number'},
+         {text:chapter.title,cls:'title'}],
+        {bg:'black'}
+      );
+
+      await beat(
+        [{text:'يمكن فعلا أقدر.',cls:'word'}],
+        {bg:'black'}
+      );
+
+      await beat(
+        chapter.lines,
+        {bg:'black'}
+      );
+
+      continue;
+    }
+
+    if(chapter.words){
+
+      await beat(
+        [{text:'05',cls:'display number'},
+         {text:chapter.title,cls:'title'}],
+        {bg:'black'}
+      );
+
+      await beat([
+        'يمكن أكبر حاجة حصلت لي في ال19 ... ما كانت إنجازا.',
+        'كانت إني بقيت أقرب لي نفسى.'
+      ],{bg:'black'});
+
+      for(const word of chapter.words){
+
+        await beat(
+          [{text:word,cls:'word accent strong'}],
+          {bg:'burgundy'}
+        );
+      }
+
+      await beat(
+        [{text:chapter.after,cls:'strong'}],
+        {bg:'burgundy'}
+      );
+
+      continue;
+    }
+
+    if(chapter.love){
+
+      await beat(
+        [{text:'06',cls:'display number'},
+         {text:chapter.title,cls:'title'}],
+        {bg:'burgundy'}
+      );
+
+      await beat(
+        [{text:'قصة حب؟',cls:'title'}],
+        {bg:'burgundy'}
+      );
+
+      await beat(
+        chapter.lines,
+        {bg:'burgundy'}
+      );
+
+      continue;
+    }
+
+    await beat(
+      [
+        {
+          text:String(chapter.n).padStart(2,'0'),
+          cls:'display number'
+        },
+        {
+          text:chapter.title,
+          cls:'title'
+        }
+      ],
+      {bg:'black'}
+    );
+
+    await beat(
+      chapter.lines,
+      {bg:'black'}
+    );
+  }
+
+  hideBadges();
+
+  await ending();
+}
+
+async function ending(){
+
+  await beat(
+    ['إذن... من أصبحت إسراء في الـ19؟'],
+    {bg:'black'}
+  );
+
+  const lines=[
+    'أصبحت أعرف نفسي أكثر.',
+    'عرفت أنني أقدر.',
+    'عرفت أنني محاطة بالحب.',
+    'عرفت أنني أستطيع الخروج من منطقة راحتي.',
+    'وعرفت أنني لست مضطرة أن أكون مثالية حتى أكون فخورة بنفسي.',
+    'وأظن أن هذا يكفي.'
+  ];
+
+  for(const text of lines){
+
+    await beat(
+      [{text,cls:'accent'}],
+      {bg:'beige'}
+    );
+  }
+
+  await clear();
+
+  bg('black');
+
+  const ready=document.createElement('div');
+
+  ready.className='display title';
+  ready.textContent="I'm ready.";
+
+  app.appendChild(ready);
+
+  await new Promise(r=>setTimeout(r,1200));
+
+  await beat(
+    [{text:'But are you ready for me?',cls:'accent strong'}],
+    {bg:'black'}
+  );
+
+  await clear();
+
+  bg('black');
+
+  const final=document.createElement('div');
+
+  final.className='display title';
+  final.textContent="Let's begin.";
+
+  app.appendChild(final);
+
+  await new Promise(r=>setTimeout(r,1800));
+
+  const restart=document.createElement('button');
+
+  restart.className='restart';
+  restart.textContent='إعادة الرحلة من البداية';
+
+  restart.onclick=()=>{
+    sessionStorage.clear();
+    location.href='index.html';
+  };
+
+  app.appendChild(restart);
+}
+
+async function run(){
+
+  const selected=
+    sessionStorage.getItem('firstSection');
+
+  /*
+    الاختيار في البداية لا يلغي أي قسم.
+    نحن فقط نحدد من أين تبدأ الرحلة.
+  */
+
+  if(selected==='events'){
+
+    await events();
+    await self();
+
+  }else if(selected==='self'){
+
+    await self();
+    await events();
+
+    /*
+      بعد "أنا" نعود للأحداث.
+      لكن النهاية تكون بعد اكتمال الرحلة.
+    */
+
+    await self();
+
+  }else{
+
+    /*
+      الأشخاص تم عرضهم بالفعل في people.html.
+      لذلك نبدأ بالأحداث ثم الذات.
+    */
+
+    await events();
+    await self();
+  }
+}
+
+run();
+
+})();
+</script>
+
+</body>
+</html>
