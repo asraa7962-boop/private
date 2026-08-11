@@ -1,0 +1,40 @@
+const ambient = document.getElementById('ambient');
+
+function createAmbient(){
+
+  ambient.innerHTML = '';
+
+  const colors = [
+    'var(--blue)',
+    'var(--burgundy)',
+    'var(--cream)'
+  ];
+
+  for(let i = 0; i < 7; i++){
+
+    const balloon = document.createElement('div');
+
+    balloon.className = 'ambient-balloon';
+
+    balloon.style.left =
+      Math.random() * 100 + '%';
+
+    balloon.style.top =
+      Math.random() * 100 + '%';
+
+    balloon.style.setProperty(
+      '--duration',
+      (8 + Math.random() * 8) + 's'
+    );
+
+    balloon.style.animationDelay =
+      (-Math.random() * 8) + 's';
+
+    balloon.style.background =
+      colors[Math.floor(Math.random() * colors.length)];
+
+    ambient.appendChild(balloon);
+  }
+}
+
+createAmbient();
