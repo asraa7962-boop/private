@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+<title>19 — إسراء</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --blue:#4169E1;
+  --burgundy:#7A1F2B;
+  --beige:#F3E8D3;
+  --black:#111111;
+  --ink:#1c1912;
+
+  --bg:var(--beige);
+  --fg:var(--ink);
+  --accent:var(--blue);
+
+  --fast:.5s;
+  --slow:1.4s;
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
+
+html,body{
+  width:100%;
+  height:100%;
+  margin:0;
+  padding:0;
+  overflow:hidden;
+}
+
+body{
+  background:var(--bg);
+  color:var(--fg);
+  font-family:'Tajawal',sans-serif;
+  transition:
+    background-color var(--slow) var(--ease),
+    color var(--slow) var(--ease);
+}
+
+body.black{
+  --bg:#111111;
+  --fg:#F3E8D3;
+  --accent:var(--blue);
+}
+
+body.beige{
+  --bg:#F3E8D3;
+  --fg:#1c1912;
+  --accent:var(--blue);
+}
+
+body.burgundy{
+  --bg:#F3E8D3;
+  --fg:#1c1912;
+  --accent:var(--burgundy);
+}
+
+#stage{
+  position:fixed;
+  inset:0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:8vh 6vw;
+  outline:none;
+}
+
+#app{
+  width:100%;
+  max-width:650px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-align:center;
+  gap:1.1em;
+}
+
+.line{
+  opacity:0;
+  transform:translateY(14px);
+  animation:rise .5s var(--ease) forwards;
+  font-size:clamp(1.05rem,2.4vw + .8rem,1.5rem);
+  line-height:1.65;
+  font-weight:400;
+  max-width:34ch;
+}
+
+.line.strong{
+  font-weight:700;
+}
+
+.line.accent{
+  color:var(--accent);
+}
+
+.line.small{
+  font-size:clamp(.85rem,1.6vw + .6rem,1.05rem);
+  opacity:.85 !important;
+}
+
+.title{
+  font-family:'Amiri',serif;
+  font-weight:700;
+  font-size:clamp(1.8rem,5vw,2.8rem);
+  color:var(--accent);
+}
+
+.display{
+  font-family:'Amiri',serif;
+  font-weight:700;
+  color:var(--accent);
+  line-height:1;
+}
+
+.num{
+  font-size:clamp(5rem,22vw,11rem);
+}
+
+@keyframes rise{
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+.leaving .line{
+  animation:fall .5s var(--ease) forwards;
+}
+
+@keyframes fall{
+  to{
+    opacity:0;
+    transform:translateY(-14px);
+  }
+}
+
+.choices{
+  width:100%;
+  max-width:330px;
+  display:flex;
+  flex-direction:column;
+  gap:.7em;
+  margin-top:.4em;
+}
+
+.choices.row{
+  flex-direction:row;
+  justify-content:center;
+  flex-wrap:wrap;
+}
+
+.choice{
+  font-family:'Tajawal',sans-serif;
+  font-size:1rem;
+  font-weight:500;
+  padding:.85em 1.4em;
+  border-radius:999px;
+  border:1.5px solid var(--accent);
+  background:transparent;
+  color:var(--fg);
+  cursor:pointer;
+  opacity:0;
+  animation:rise .5s var(--ease) forwards;
+  transition:
+    background .5s var(--ease),
+    color .5s var(--ease),
+    transform .25s var(--ease),
+    opacity .5s;
+}
+
+.choice:hover{
+  transform:translateY(-2px);
+}
+
+.choice.picked{
+  background:var(--accent);
+  color:#F3E8D3;
+}
+
+.choice.faded{
+  opacity:.3 !important;
+}
+
+.continue{
+  position:fixed;
+  bottom:6vh;
+  left:50%;
+  transform:translateX(-50%);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:.3em;
+  opacity:0;
+  font-size:.75rem;
+  letter-spacing:.08em;
+  color:var(--fg);
+  animation:bob 2.2s ease-in-out infinite;
+  pointer-events:none;
+}
+
+@keyframes bob{
+  0%,100%{transform:translate(-50%,0)}
+  50%{transform:translate(-50%,6px)}
+}
+
+.chev{
+  width:14px;
+  height:14px;
+  border-inline-end:2px solid currentColor;
+  border-block-end:2px solid currentColor;
+  transform:rotate(45deg);
+}
+
+.fine{
+  position:fixed;
+  bottom:2vh;
+  left:50%;
+  transform:translateX(-50%);
+  font-size:.65rem;
+  opacity:.35;
+}
+
+@media(prefers-reduced-motion:reduce){
+  *{
+    animation-duration:.01ms!important;
+    transition-duration:.01ms!important;
+  }
+}
+</style>
+</head>
+
+<body class="black">
+
+<div id="stage" tabindex="0">
+  <div id="app"></div>
+</div>
+
+<div class="continue" id="continueHint">
+  <span class="chev"></span>
+  <span>تابعي</span>
+</div>
+
+<div class="fine">19 — إسراء</div>
+
+<script>
+(function(){
+
+const app=document.getElementById('app');
+const stage=document.getElementById('stage');
+const hint=document.getElementById('continueHint');
+
+function bg(type){
+  document.body.className=type;
+}
+
+function clear(){
+  return new Promise(resolve=>{
+    if(!app.children.length){
+      resolve();
+      return;
+    }
+
+    app.classList.add('leaving');
+
+    setTimeout(()=>{
+      app.innerHTML='';
+      app.classList.remove('leaving');
+      resolve();
+    },420);
+  });
+}
+
+async function screen(lines,options={}){
+  await clear();
+
+  bg(options.bg || 'black');
+
+  hint.style.opacity=0;
+
+  lines.forEach((item,i)=>{
+
+    const data=typeof item==='string'
+      ? {text:item}
+      : item;
+
+    const el=document.createElement('div');
+
+    el.className='line '+(data.cls||'');
+
+    el.textContent=data.text;
+
+    el.style.animationDelay=
+      (data.delay!==undefined
+        ? data.delay
+        : i*.35)+'s';
+
+    app.appendChild(el);
+  });
+
+  const delay=
+    lines.length
+      ? (lines.length-1)*.35+.6
+      : .5;
+
+  setTimeout(()=>{
+    hint.style.opacity=.6;
+  },delay*1000);
+
+  return delay;
+}
+
+function wait(){
+  return new Promise(resolve=>{
+
+    function done(){
+      stage.removeEventListener('click',done);
+      window.removeEventListener('keydown',key);
+      hint.style.opacity=0;
+      resolve();
+    }
+
+    function key(e){
+      if(['Enter',' ','ArrowLeft','ArrowRight'].includes(e.key)){
+        done();
+      }
+    }
+
+    stage.addEventListener('click',done);
+    window.addEventListener('keydown',key);
+  });
+}
+
+async function beat(lines,options={}){
+  const delay=await screen(lines,options);
+
+  await new Promise(r=>
+    setTimeout(r,Math.max(300,delay*300))
+  );
+
+  await wait();
+}
+
+function choices(lines,items,options={}){
+  return new Promise(async resolve=>{
+
+    await clear();
+
+    bg(options.bg || 'beige');
+
+    hint.style.opacity=0;
+
+    lines.forEach((item,i)=>{
+
+      const data=typeof item==='string'
+        ? {text:item}
+        : item;
+
+      const el=document.createElement('div');
+
+      el.className='line '+(data.cls||'');
+      el.textContent=data.text;
+
+      el.style.animationDelay=(i*.35)+'s';
+
+      app.appendChild(el);
+    });
+
+    const wrap=document.createElement('div');
+
+    wrap.className=
+      'choices '+(options.row?'row':'');
+
+    items.forEach((item,i)=>{
+
+      const btn=document.createElement('button');
+
+      btn.className='choice';
+      btn.textContent=item.label;
+
+      btn.style.animationDelay=
+        (.35*lines.length+.2+i*.15)+'s';
+
+      btn.onclick=function(e){
+
+        e.stopPropagation();
+
+        [...wrap.children].forEach(x=>
+          x.classList.add('faded')
+        );
+
+        btn.classList.remove('faded');
+        btn.classList.add('picked');
+
+        setTimeout(()=>{
+          resolve(item.value);
+        },550);
+      };
+
+      wrap.appendChild(btn);
+    });
+
+    app.appendChild(wrap);
+  });
+}
+
+async function intro(){
+
+  await beat(
+    ['مرحبًا.','قبل أن تكمل...'],
+    {bg:'black'}
+  );
+
+  const first=await choices(
+    ['هل تعرفني؟'],
+    [
+      {label:'نعم',value:'yes'},
+      {label:'لا',value:'no'}
+    ],
+    {bg:'black',row:true}
+  );
+
+  if(first==='yes'){
+
+    await beat(
+      [{text:'هل أنت متأكد؟',cls:'title'}],
+      {bg:'black'}
+    );
+
+    await choices(
+      [''],
+      [
+        {label:'لنعرف المزيد',value:'continue'}
+      ],
+      {bg:'black'}
+    );
+
+  }else{
+
+    await beat(
+      ['حسنًا.','ستعرف أكثر عني.'],
+      {bg:'black'}
+    );
+  }
+
+  await beat(
+    ['أنا إسراء.'],
+    {bg:'black'}
+  );
+
+  await beat(
+    ['وهذه ليست سيرة ذاتية.'],
+    {bg:'black'}
+  );
+
+  await beat(
+    [{text:'19',cls:'display num'}],
+    {bg:'black'}
+  );
+
+  await beat(
+    ['سنة واحدة.','أشياء كثيرة حدثت.','وأشياء أكثر تغيّرت.'],
+    {bg:'black'}
+  );
+
+  const firstSection=await choices(
+    ['داير تعرف بي شنو أول؟'],
+    [
+      {label:'الأشخاص',value:'people'},
+      {label:'الأحداث',value:'events'},
+      {label:'أنا',value:'self'}
+    ],
+    {bg:'beige',row:true}
+  );
+
+  sessionStorage.setItem('firstSection',firstSection);
+
+  location.href='people.html';
+}
+
+stage.focus();
+intro();
+
+})();
+</script>
+
+</body>
+</html>
