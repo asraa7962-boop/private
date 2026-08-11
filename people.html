@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+<title>الأشخاص — إسراء</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --blue:#4169E1;
+  --burgundy:#7A1F2B;
+  --beige:#F3E8D3;
+  --black:#111;
+  --ink:#1c1912;
+
+  --bg:var(--beige);
+  --fg:var(--ink);
+  --accent:var(--blue);
+
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
+
+html,body{
+  width:100%;
+  height:100%;
+  margin:0;
+  overflow:hidden;
+}
+
+body{
+  background:var(--bg);
+  color:var(--fg);
+  font-family:'Tajawal',sans-serif;
+  transition:background 1.4s var(--ease),color 1.4s var(--ease);
+}
+
+.black{
+  --bg:#111;
+  --fg:#F3E8D3;
+}
+
+.beige{
+  --bg:#F3E8D3;
+  --fg:#1c1912;
+}
+
+#stage{
+  position:fixed;
+  inset:0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:8vh 6vw;
+}
+
+#app{
+  width:100%;
+  max-width:650px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-align:center;
+  gap:1.1em;
+}
+
+.line{
+  opacity:0;
+  transform:translateY(14px);
+  animation:rise .5s var(--ease) forwards;
+  font-size:clamp(1.05rem,2.4vw + .8rem,1.5rem);
+  line-height:1.65;
+  max-width:34ch;
+}
+
+.strong{
+  font-weight:700;
+}
+
+.accent{
+  color:var(--accent);
+}
+
+.title{
+  font-family:'Amiri',serif;
+  font-weight:700;
+  font-size:clamp(1.8rem,5vw,2.8rem);
+  color:var(--accent);
+}
+
+.display{
+  font-family:'Amiri',serif;
+  font-weight:700;
+  color:var(--accent);
+  line-height:1;
+}
+
+@keyframes rise{
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+.leaving .line{
+  animation:fall .5s var(--ease) forwards;
+}
+
+@keyframes fall{
+  to{
+    opacity:0;
+    transform:translateY(-14px);
+  }
+}
+
+.continue{
+  position:fixed;
+  bottom:6vh;
+  left:50%;
+  transform:translateX(-50%);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:.3em;
+  opacity:0;
+  font-size:.75rem;
+  animation:bob 2.2s ease-in-out infinite;
+  pointer-events:none;
+}
+
+@keyframes bob{
+  0%,100%{transform:translate(-50%,0)}
+  50%{transform:translate(-50%,6px)}
+}
+
+.chev{
+  width:14px;
+  height:14px;
+  border-inline-end:2px solid currentColor;
+  border-block-end:2px solid currentColor;
+  transform:rotate(45deg);
+}
+
+.names{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:.45em;
+}
+
+.name{
+  font-family:'Amiri',serif;
+  font-size:1.45rem;
+  font-weight:700;
+  color:var(--accent);
+  opacity:0;
+  animation:rise .5s var(--ease) forwards;
+}
+
+@media(prefers-reduced-motion:reduce){
+  *{
+    animation-duration:.01ms!important;
+    transition-duration:.01ms!important;
+  }
+}
+</style>
+</head>
+
+<body class="beige">
+
+<div id="stage">
+  <div id="app"></div>
+</div>
+
+<div class="continue" id="hint">
+  <span class="chev"></span>
+  <span>تابعي</span>
+</div>
+
+<script>
+(function(){
+
+const app=document.getElementById('app');
+const stage=document.getElementById('stage');
+const hint=document.getElementById('hint');
+
+function setBg(type){
+  document.body.className=type;
+}
+
+function clear(){
+  return new Promise(resolve=>{
+
+    if(!app.children.length){
+      resolve();
+      return;
+    }
+
+    app.classList.add('leaving');
+
+    setTimeout(()=>{
+      app.innerHTML='';
+      app.classList.remove('leaving');
+      resolve();
+    },420);
+  });
+}
+
+async function screen(lines,options={}){
+  await clear();
+
+  setBg(options.bg || 'beige');
+
+  hint.style.opacity=0;
+
+  lines.forEach((item,i)=>{
+
+    const data=
+      typeof item==='string'
+        ? {text:item}
+        : item;
+
+    const el=document.createElement('div');
+
+    el.className='line '+(data.cls||'');
+
+    el.textContent=data.text;
+
+    el.style.animationDelay=
+      (data.delay!==undefined
+        ? data.delay
+        : i*.35)+'s';
+
+    app.appendChild(el);
+  });
+
+  if(options.node){
+    app.appendChild(options.node);
+  }
+
+  const total=
+    lines.length
+      ? (lines.length-1)*.35+.6
+      : .5;
+
+  setTimeout(()=>{
+    hint.style.opacity=.6;
+  },total*1000);
+
+  return total;
+}
+
+function wait(){
+  return new Promise(resolve=>{
+
+    function click(){
+      cleanup();
+      resolve();
+    }
+
+    function key(e){
+      if(['Enter',' ','ArrowLeft','ArrowRight'].includes(e.key)){
+        cleanup();
+        resolve();
+      }
+    }
+
+    function cleanup(){
+      stage.removeEventListener('click',click);
+      window.removeEventListener('keydown',key);
+      hint.style.opacity=0;
+    }
+
+    stage.addEventListener('click',click);
+    window.addEventListener('keydown',key);
+  });
+}
+
+async function beat(lines,options={}){
+  const delay=await screen(lines,options);
+
+  await new Promise(r=>
+    setTimeout(r,Math.max(300,delay*300))
+  );
+
+  await wait();
+}
+
+async function namesScreen(){
+
+  const wrap=document.createElement('div');
+  wrap.className='names';
+
+  const names=[
+    'سلسبيل',
+    'شيماء',
+    'مزن',
+    'داليا',
+    'صفاء'
+  ];
+
+  names.forEach((name,i)=>{
+
+    const el=document.createElement('div');
+
+    el.className='name';
+    el.textContent=name;
+    el.style.animationDelay=(i*.35)+'s';
+
+    wrap.appendChild(el);
+  });
+
+  await beat(
+    ['خمسة أسماء أصبحت جزءًا من حكاية هذه السنة.'],
+    {
+      bg:'beige',
+      node:wrap
+    }
+  );
+}
+
+async function person(name,lines){
+
+  await clear();
+
+  setBg('beige');
+  hint.style.opacity=0;
+
+  const title=document.createElement('div');
+
+  title.className='display title';
+  title.textContent=name;
+  title.style.animation='rise .5s var(--ease) forwards';
+
+  app.appendChild(title);
+
+  lines.forEach((text,i)=>{
+
+    const el=document.createElement('div');
+
+    el.className='line';
+    el.textContent=text;
+    el.style.animationDelay=(.45+i*.35)+'s';
+
+    app.appendChild(el);
+  });
+
+  const total=.45+lines.length*.35+.6;
+
+  setTimeout(()=>{
+    hint.style.opacity=.6;
+  },total*600);
+
+  await new Promise(r=>
+    setTimeout(r,Math.max(400,total*300))
+  );
+
+  await wait();
+}
+
+async function run(){
+
+  await beat(
+    [{text:'الأشخاص',cls:'title'}],
+    {bg:'beige'}
+  );
+
+  await beat([
+    'في هذه السنة، قابلت أشخاصًا كثيرين.',
+    'تعاملت مع أعمار مختلفة، وشخصيات مختلفة، ومرّ بي أشخاص من أنواع كثيرة.',
+    'بعضهم كان مجرد عابر...',
+    'وبعضهم ترك شيئًا صغيرًا وبقي.'
+  ]);
+
+  await beat([
+    'لكن هناك أشخاصًا يستحقون أن تُذكر أسماؤهم عندما أتذكر سنتي التاسعة عشرة.'
+  ]);
+
+  await namesScreen();
+
+  await person('سلسبيل',[
+    'في ناس حبهم ليك بيخليك تحس إنك محبوب...',
+    'وسلسبيل حبها بيخليك تحس إنك مميز.',
+    'ما فشلت يوم تحسسني بحبها لي، ولا خلتني أشك في مكانتي عندها.',
+    'دايمًا شايفاني حلوة، جميلة، رهيبة، وموهوبة... وشايفة إني مكسب لأي زول يعرفني.',
+    'بتتذكرني، بترفع من قيمتي، وبتشوف فيني حاجات حلوة يمكن أنا ذاتي ما بكون شايفاها.',
+    'ما بتخليني أنسى إني مميزة.',
+    'وحبها لي مختلف...'
+  ]);
+
+  await person('شيماء',[
+    'لو سلسبيل كانت الحب البخليني أشوف نفسي بعين حلوة...',
+    'فشيماء كانت الونس.',
+    'كانت الضحك، والخروجات، والوقت البنمضيه سوا من غير ما نحس بيهو.',
+    'لغة حبها كانت مشاركة الوقت؛ إنها تكون معاي، وتشاركني تفاصيل يومي، حتى التفاصيل العادية.',
+    'طاقتنا قريبة من بعض بطريقة غريبة، حتى ضحكتنا بقت شبه بعض.',
+    'ومعاها، حاجات بسيطة جدًا بقت ذكريات.',
+    'شيماء كانت جزءًا من أجمل ضحكات سنتي الـ19.'
+  ]);
+
+  await person('مزن',[
+    'ولو سلسبيل كانت الحب البخليني أشوف نفسي بعين حلوة، وشيماء كانت الونس والضحك...',
+    'فمزن كانت الرفقة.',
+    'الهادية، لكن المواكبة لطاقتنا، والمجنونة معانا بطريقتها.',
+    'كانت دائمًا مستمعة كويسة لحكاياتي الطويلة، ولا مرة حسستني إني طولت أو ملت منها.',
+    'يمكن ما بتتعود بسرعة على الناس... لكن معاي، اتعودت.',
+    'كانت رفيقة المواصلات، والأيام الصعبة، والجرسة.',
+    'لو اتضايقت ساي... مزن حتكون معاي.'
+  ]);
+
+  await person('داليا',[
+    'وكانت داليا واحدة من الأسماء البقت جزءًا من السنة.',
+    'يمكن ما كانت الحكاية كلها كلام كبير أو لحظات ضخمة...',
+    'لكن وجودها بقى جزءًا من تفاصيل السنة.',
+    'وفي النهاية، التفاصيل الصغيرة هي البتخلي الناس يبقوا جزءًا من ذاكرتنا.'
+  ]);
+
+  await person('صفاء',[
+    'وصفاء برضو كانت من الناس البقوا جزءًا من الحكاية.',
+    'اسم ممكن يمر عادي لو ما عشت السنة دي...',
+    'لكن بالنسبة لي، بقى مرتبطًا بمرحلة كاملة من حياتي.',
+    'وبعض الناس ما محتاجين يعملوا حاجة عظيمة عشان يتذكروا.'
+  ]);
+
+  await beat([
+    'ومعاهم، دايمًا بحس إني مفهومة.',
+    'ومحبوبة شديد.',
+    'ومميزة.',
+    'وبحس إني ما براي.'
+  ]);
+
+  await beat([
+    'وكل واحدة فيهم كان عندها طريقتها الخاصة في تخلي سنتي أخف وأجمل.',
+    'لكن من بين كل الأسماء البقت جزء من سنتي الـ19، كانوا هم الأقرب لحكايتها.'
+  ]);
+
+  await beat([
+    'لكن السنة ما كانت أشخاصًا فقط.',
+    'كانت هناك أشياء حدثت...'
+  ]);
+
+  location.href='story.html?section=events';
+}
+
+run();
+
+})();
+</script>
+
+</body>
+</html>
